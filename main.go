@@ -25,13 +25,13 @@ import (
 )
 
 const (
-	doorOpenDuration       time.Duration = 60 * time.Second
-	resetToIdleDuration    time.Duration = 2 * time.Second
-	resetCodeInputDuration time.Duration = 5 * time.Second
+	doorOpenDuration       = 60 * time.Second
+	resetToIdleDuration    = 2 * time.Second
+	resetCodeInputDuration = 5 * time.Second
 
-	maxCodeLength int = 6
+	maxCodeLength = 6
 
-	defaultCode string = "1234"
+	defaultCode = "1234"
 )
 
 var timer *time.Timer
