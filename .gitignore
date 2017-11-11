@@ -16,3 +16,4 @@ Gopkg.lock
 /bin/
 .AppleDouble
 env.sh
+parceldrop

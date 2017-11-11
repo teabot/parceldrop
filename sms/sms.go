@@ -16,9 +16,14 @@ import (
 
 var sess *session.Session
 var svc *sns.SNS
+var msdns []string
 
 // Initialise x
-func Initialise() {
+func Initialise(destinations []string) {
+	msdns = destinations
+	if len(msdns) <= 0 {
+		log.Println("SNS: No mobile subscripers set")
+	}
 	log.Println("SNS: creating session")
 	sess = session.Must(session.NewSession())
 	log.Println("SNS: session created")
@@ -28,6 +33,10 @@ func Initialise() {
 }
 
 func send(message string) {
+	if len(msdns) <= 0 {
+		return
+	}
+
 	attributes := map[string]*sns.MessageAttributeValue{
 		"AWS.SNS.SMS.SenderID": &sns.MessageAttributeValue{
 			DataType:    aws.String("String"),
@@ -39,22 +48,24 @@ func send(message string) {
 		},
 	}
 
-	params := &sns.PublishInput{
-		Message:           aws.String(message),
-		PhoneNumber:       aws.String("+447946512898"),
-		MessageAttributes: attributes,
-	}
-	resp, err := svc.Publish(params)
+	for _, msdn := range msdns {
+		params := &sns.PublishInput{
+			Message:           aws.String(message),
+			PhoneNumber:       aws.String(msdn),
+			MessageAttributes: attributes,
+		}
+		resp, err := svc.Publish(params)
 
-	if err != nil {
-		// Print the error, cast err to awserr.Error to get the Code and
-		// Message from an error.
-		log.Println(err.Error())
-		return
-	}
+		if err != nil {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			log.Println(err.Error())
+			return
+		}
 
-	// Pretty-print the response data.
-	log.Println(resp)
+		// Pretty-print the response data.
+		log.Println(resp)
+	}
 }
 
 // SendCorrectCode x

@@ -17,7 +17,13 @@ package main
 
 import (
 	"log"
+	"os"
+	"strings"
 	"time"
+
+	"github.com/teabot/parceldrop/control"
+
+	"github.com/teabot/parceldrop/codebook"
 
 	"github.com/teabot/parceldrop/door"
 	"github.com/teabot/parceldrop/keypad"
@@ -26,26 +32,27 @@ import (
 
 const (
 	doorOpenDuration       = 60 * time.Second
-	resetToIdleDuration    = 2 * time.Second
+	resetToIdleDuration    = 3 * time.Second
 	resetCodeInputDuration = 5 * time.Second
 
 	maxCodeLength = 6
-
-	defaultCode = "1234"
+	defaultCode   = "1234"
 )
 
 var timer *time.Timer
 
 func main() {
+	codebook.Initialise(os.Getenv("ADMIN_CODE"), defaultCode)
+	sms.Initialise(strings.Split(os.Getenv("SMS_DESTINATIONS"), ","))
 	door.Initialise()
-	sms.Initialise()
+	control.InitialiseSqs(os.Getenv("AWS_SQS_QUEUE"))
 
 	codeFn := func(code keypad.Code) {
 		if door.Locked() {
-			unschedule()
+			unscheduleAnyEvents()
 			door.Wait()
 			log.Printf("Code: %v, Submitted: %v\n", code.Digits, code.Submitted)
-			if code.Digits == defaultCode {
+			if codebook.Check(code.Digits, time.Now().UTC()) {
 				validCode(code.Digits)
 			} else {
 				if code.Submitted == keypad.Final || code.Submitted == keypad.User {
@@ -74,45 +81,60 @@ func validCode(digits string) {
 	log.Printf("Opened with code: %v\n", digits)
 	door.Unlock()
 	sms.SendCorrectCode(digits)
-	schedule(resetToLocked())
+	scheduleEvent(resetToLocked())
 }
 
 func invalidCode(digits string) {
 	log.Printf("Invalid code: %v\n", digits)
 	door.Reject()
 	sms.SendInvalidCode(digits)
-	schedule(resetToIdle())
+	scheduleEvent(resetToIdle())
 }
 
-func schedule(nextTimer *time.Timer) {
-	unschedule()
+func scheduleEvent(nextTimer *time.Timer) {
+	unscheduleAnyEvents()
 	timer = nextTimer
 }
 
-func unschedule() {
+func unscheduleAnyEvents() {
 	if timer != nil {
 		timer.Stop()
+		timer = nil
+		log.Println("Unscheduled timer")
 	}
 }
 
 func resetToLocked() *time.Timer {
 	resetToLocked := time.NewTimer(doorOpenDuration)
-	go func() {
-		select {
-		case <-resetToLocked.C:
-			if door.Open() {
-				sms.SendDoorNotClosed()
-				log.Println("Door not closed")
-			}
-		default:
-			for door.Open() {
-				time.Sleep(500 * time.Millisecond)
-			}
-			log.Println("Detected door close")
-		}
-		door.Lock()
-	}()
+	go checkDoorClosed(resetToLocked)
+	log.Println("Scheduled resetToLocked")
 	return resetToLocked
+}
+
+func checkDoorClosed(resetToLocked *time.Timer) {
+	checkContactClosed := make(chan bool)
+	go contactCheck(checkContactClosed)
+
+	select {
+	case <-resetToLocked.C:
+		log.Println("resetToLocked returned")
+		if door.Open() {
+			sms.SendDoorNotClosed()
+			log.Println("Door not closed")
+		}
+	case <-checkContactClosed:
+		log.Println("Detected door close 2")
+		unscheduleAnyEvents()
+	}
+	door.Lock()
+}
+
+func contactCheck(check chan bool) {
+	for door.Open() {
+		time.Sleep(500 * time.Millisecond)
+	}
+	log.Println("Detected door close 1")
+	check <- true
 }
 
 func resetToIdle() *time.Timer {
@@ -121,5 +143,6 @@ func resetToIdle() *time.Timer {
 		<-resetToIdle.C
 		door.Lock()
 	}()
+	log.Println("Scheduled resetToIdle")
 	return resetToIdle
 }

@@ -13,13 +13,17 @@ type inputPin int
 type outputPin int
 
 const (
-	red   outputPin = 3
-	green outputPin = 4
-	blue  outputPin = 5
-	white outputPin = 6
-	latch outputPin = 7
+	red   outputPin = 4
+	green outputPin = 5
+	blue  outputPin = 6
+	white outputPin = 7
+	latch outputPin = 3
 
-	contact inputPin = 1
+	contact  inputPin = 0
+	override inputPin = 1
+
+	open   = 1
+	closed = 0
 )
 
 var locked = true
@@ -34,13 +38,13 @@ func Initialise() error {
 		return err
 	}
 	Lock()
+	go checkOverride()
 	return nil
 }
 
 // Open x
 func Open() bool {
-	// return pfd.Switches[contact].Value() != 0
-	return false
+	return pfd.Switches[contact].Value() == open
 }
 
 // Closed x
@@ -104,4 +108,14 @@ func Lock() {
 	pfd.Leds[white].AllOn()
 	locked = true
 	return
+}
+
+func checkOverride() {
+	for {
+		if pfd.Switches[override].Value() == closed && locked {
+			log.Println("Manual override, unlocking")
+			Unlock()
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
 }
