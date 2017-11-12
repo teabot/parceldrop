@@ -44,8 +44,8 @@ var timer *time.Timer
 func main() {
 	codebook.Initialise(os.Getenv("ADMIN_CODE"), defaultCode)
 	sms.Initialise(strings.Split(os.Getenv("SMS_DESTINATIONS"), ","))
-	door.Initialise()
-	control.InitialiseSqs(os.Getenv("AWS_SQS_QUEUE"))
+	door.Initialise(overrideOpen)
+	control.InitialiseSqs(os.Getenv("AWS_SQS_QUEUE"), overrideOpen)
 
 	codeFn := func(code keypad.Code) {
 		if door.Locked() {
@@ -84,11 +84,18 @@ func validCode(digits string) {
 	scheduleEvent(resetToLocked())
 }
 
+func overrideOpen(overrideType string) {
+	scheduleEvent(resetToLocked())
+	log.Printf("MAIN: Opened with override: %v\n", overrideType)
+	door.Unlock()
+	sms.SendOverrideOpen(overrideType)
+}
+
 func invalidCode(digits string) {
+	scheduleEvent(resetToIdle())
 	log.Printf("MAIN: Invalid code: %v\n", digits)
 	door.Reject()
 	sms.SendInvalidCode(digits)
-	scheduleEvent(resetToIdle())
 }
 
 func scheduleEvent(nextTimer *time.Timer) {

@@ -28,9 +28,11 @@ const (
 
 var locked = true
 var pfd *piface.PiFaceDigital
+var openFn func(string)
 
 // Initialise x
-func Initialise() error {
+func Initialise(overrideFn func(string)) error {
+	openFn = overrideFn
 	pfd = piface.NewPiFaceDigital(spi.DEFAULT_HARDWARE_ADDR, spi.DEFAULT_BUS, spi.DEFAULT_CHIP)
 	err := pfd.InitBoard()
 	if err != nil {
@@ -38,8 +40,7 @@ func Initialise() error {
 		return err
 	}
 	Lock()
-	// This does not work properly
-	// go checkOverride()
+	go checkOverride()
 	return nil
 }
 
@@ -116,7 +117,7 @@ func checkOverride() {
 	for {
 		if pfd.Switches[override].Value() == closed && locked {
 			log.Println("DOOR: Manual override, unlocking")
-			Unlock()
+			openFn("button")
 		}
 		time.Sleep(200 * time.Millisecond)
 	}

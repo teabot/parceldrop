@@ -97,3 +97,9 @@ func SendUpdatedCode(name, digits *string) {
 	log.Println("SMS: code updated")
 	go func() { send("Code updated: " + *name + " [" + *digits + "]") }()
 }
+
+// SendOverrideOpen x
+func SendOverrideOpen(overrideType string) {
+	log.Printf("SMS: open override: %v\n", overrideType)
+	go func() { send("Door opened with override " + overrideType) }()
+}

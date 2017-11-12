@@ -26,14 +26,17 @@ const (
 	UpdateCode  InstructionType = "update"
 )
 
+var openFn func(string)
+
 // InitialiseSqs x
-func InitialiseSqs(queueURL string) {
+func InitialiseSqs(queueURL string, overrideFn func(string)) {
+	openFn = overrideFn
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
 
 	svc := sqs.New(sess)
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(3 * time.Second)
 	go poll(ticker, svc, queueURL)
 }
 
@@ -91,8 +94,7 @@ func receive(svc *sqs.SQS, queueURL string) {
 func processPayload(payload *Instruction) {
 	switch payload.InsType {
 	case OpenDoor:
-		// This does not work
-		// openDoorInstruction(payload)
+		openDoorInstruction(payload)
 	case RescindCode:
 		rescindInstruction(payload)
 	case UpdateCode:
@@ -102,10 +104,10 @@ func processPayload(payload *Instruction) {
 	}
 }
 
-// func openDoorInstruction(payload *Instruction) {
-// 	log.Println("CONTROL: Remote override unlock")
-// 	door.Unlock()
-// }
+func openDoorInstruction(payload *Instruction) {
+	log.Println("CONTROL: Remote override unlock")
+	openFn("control")
+}
 
 func rescindInstruction(payload *Instruction) {
 	log.Println("CONTROL: Rescinding code")
