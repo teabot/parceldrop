@@ -16,9 +16,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/teabot/parceldrop/control"
@@ -42,10 +45,23 @@ const (
 var timer *time.Timer
 
 func main() {
+	var gracefulStop = make(chan os.Signal)
+	signal.Notify(gracefulStop, syscall.SIGTERM)
+	signal.Notify(gracefulStop, syscall.SIGINT)
+
 	codebook.Initialise(os.Getenv("ADMIN_CODE"), defaultCode)
 	sms.Initialise(strings.Split(os.Getenv("SMS_DESTINATIONS"), ","))
 	door.Initialise(overrideOpen)
 	control.InitialiseSqs(os.Getenv("AWS_SQS_QUEUE"), overrideOpen)
+
+	go func() {
+		sig := <-gracefulStop
+		fmt.Printf("caught sig: %+v", sig)
+		fmt.Println("Wait for 2 second to finish processing")
+		codebook.CloseStore()
+		time.Sleep(2 * time.Second)
+		os.Exit(0)
+	}()
 
 	codeFn := func(code keypad.Code) {
 		if door.Locked() {
