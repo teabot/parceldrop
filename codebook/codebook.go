@@ -1,7 +1,11 @@
 package codebook
 
-import "log"
-import "time"
+import (
+	"log"
+	"time"
+
+	"github.com/teabot/parceldrop/sms"
+)
 
 // IsoTimestamp x
 type IsoTimestamp string
@@ -120,7 +124,6 @@ func Check(digits string, now time.Time) bool {
 	}
 	code.Usage++
 	code.save()
-	log.Printf("Updated code: %v\n", code)
 	return true
 }
 
@@ -158,12 +161,16 @@ func Rescind(digits *string) error {
 		log.Printf("CODEBOOK: Error saving rescinded code: %v, %v", code, err2)
 		return err
 	}
+	sms.SendRescindedCode(digits)
 	return nil
 }
 
 func Update(code *AccessCode) error {
 	log.Printf("CODEBOOK: Updating code: %v\n", code)
 	err := code.save()
+	if err == nil {
+		sms.SendUpdatedCode(&code.Name, &code.Digits)
+	}
 	return err
 }
 

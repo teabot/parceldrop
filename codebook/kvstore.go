@@ -27,7 +27,7 @@ func OpenStore() error {
 	err2 := db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte(bucketName))
 		if err != nil {
-			return fmt.Errorf("create bucket: %s", err)
+			return fmt.Errorf("CODEBOOK: create bucket: %s", err)
 		}
 		return err
 	})
@@ -45,16 +45,16 @@ func CloseStore() {
 
 func (p *AccessCode) save() error {
 	if !open {
-		return fmt.Errorf("db must be opened before saving")
+		return fmt.Errorf("CODEBOOK: db must be opened before saving")
 	}
 	err := db.Update(func(tx *bolt.Tx) error {
 		codes, err := tx.CreateBucketIfNotExists([]byte(bucketName))
 		if err != nil {
-			return fmt.Errorf("create bucket: %s", err)
+			return fmt.Errorf("CODEBOOK: create bucket: %s", err)
 		}
 		enc, err := p.encode()
 		if err != nil {
-			return fmt.Errorf("could not encode AccessCode %s: %s", p.Digits, err)
+			return fmt.Errorf("CODEBOOK: could not encode AccessCode %s: %s", p.Digits, err)
 		}
 		err = codes.Put([]byte(p.Digits), enc)
 		return err
@@ -81,7 +81,7 @@ func decode(data []byte) (*AccessCode, error) {
 
 func GetAccessCode(digits string) (*AccessCode, error) {
 	if !open {
-		return nil, fmt.Errorf("db must be opened before saving")
+		return nil, fmt.Errorf("CODEBOOK: db must be opened before saving")
 	}
 	var p *AccessCode
 	err := db.View(func(tx *bolt.Tx) error {
@@ -99,7 +99,7 @@ func GetAccessCode(digits string) (*AccessCode, error) {
 		return nil
 	})
 	if err != nil {
-		fmt.Printf("Could not get AccessCode %s", digits)
+		fmt.Printf("CODEBOOK: Could not get AccessCode %s", digits)
 		return nil, err
 	}
 	return p, nil
@@ -109,7 +109,7 @@ func List() {
 	db.View(func(tx *bolt.Tx) error {
 		c := tx.Bucket([]byte(bucketName)).Cursor()
 		for k, v := c.First(); k != nil; k, v = c.Next() {
-			fmt.Printf("key=%s, value=%s\n", k, v)
+			fmt.Printf("CODEBOOK: key=%s, value=%s\n", k, v)
 		}
 		return nil
 	})

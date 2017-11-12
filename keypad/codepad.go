@@ -47,7 +47,7 @@ func ScanCodes(device string, autoClear time.Duration, maxLength int, codeFn fun
 			}
 			if k.Enter {
 				if scanBuffer.Len() > 0 {
-					log.Printf("User submitted code: %v\n", scanBuffer.String())
+					log.Printf("KEYPAD: User submitted code: %v\n", scanBuffer.String())
 					codeFn(Code{
 						Digits:    scanBuffer.String(),
 						Submitted: User,
@@ -55,7 +55,7 @@ func ScanCodes(device string, autoClear time.Duration, maxLength int, codeFn fun
 				}
 				scanBuffer.Reset()
 			} else if k.Clear {
-				log.Println("Manual clear")
+				log.Println("KEYPAD: Manual clear")
 				scanBuffer.Reset()
 			} else {
 				scanBuffer.WriteString(k.Digit)

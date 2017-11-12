@@ -51,7 +51,7 @@ func main() {
 		if door.Locked() {
 			unscheduleAnyEvents()
 			door.Wait()
-			log.Printf("Code: %v, Submitted: %v\n", code.Digits, code.Submitted)
+			log.Printf("MAIN: Code: %v, Submitted: %v\n", code.Digits, code.Submitted)
 			if codebook.Check(code.Digits, time.Now().UTC()) {
 				validCode(code.Digits)
 			} else {
@@ -63,7 +63,7 @@ func main() {
 	}
 
 	keyTimeoutFn := func(digits string) {
-		log.Println("Auto clear")
+		log.Println("MAIN: Auto clear")
 		codeFn(keypad.Code{
 			Digits:    digits,
 			Submitted: keypad.User,
@@ -78,14 +78,14 @@ func main() {
 }
 
 func validCode(digits string) {
-	log.Printf("Opened with code: %v\n", digits)
+	log.Printf("MAIN: Opened with code: %v\n", digits)
 	door.Unlock()
 	sms.SendCorrectCode(digits)
 	scheduleEvent(resetToLocked())
 }
 
 func invalidCode(digits string) {
-	log.Printf("Invalid code: %v\n", digits)
+	log.Printf("MAIN: Invalid code: %v\n", digits)
 	door.Reject()
 	sms.SendInvalidCode(digits)
 	scheduleEvent(resetToIdle())
@@ -100,14 +100,14 @@ func unscheduleAnyEvents() {
 	if timer != nil {
 		timer.Stop()
 		timer = nil
-		log.Println("Unscheduled timer")
+		log.Println("MAIN: Unscheduled timer")
 	}
 }
 
 func resetToLocked() *time.Timer {
 	resetToLocked := time.NewTimer(doorOpenDuration)
 	go checkDoorClosed(resetToLocked)
-	log.Println("Scheduled resetToLocked")
+	log.Println("MAIN: Scheduled resetToLocked")
 	return resetToLocked
 }
 
@@ -117,13 +117,12 @@ func checkDoorClosed(resetToLocked *time.Timer) {
 
 	select {
 	case <-resetToLocked.C:
-		log.Println("resetToLocked returned")
+		log.Println("MAIN: resetToLocked returned")
 		if door.Open() {
 			sms.SendDoorNotClosed()
-			log.Println("Door not closed")
+			log.Println("MAIN: Door not closed")
 		}
 	case <-checkContactClosed:
-		log.Println("Detected door close 2")
 		unscheduleAnyEvents()
 	}
 	door.Lock()
@@ -133,7 +132,7 @@ func contactCheck(check chan bool) {
 	for door.Open() {
 		time.Sleep(500 * time.Millisecond)
 	}
-	log.Println("Detected door close 1")
+	log.Println("MAIN: Detected door close")
 	check <- true
 }
 
@@ -143,6 +142,6 @@ func resetToIdle() *time.Timer {
 		<-resetToIdle.C
 		door.Lock()
 	}()
-	log.Println("Scheduled resetToIdle")
+	log.Println("MAIN: Scheduled resetToIdle")
 	return resetToIdle
 }

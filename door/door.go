@@ -34,11 +34,12 @@ func Initialise() error {
 	pfd = piface.NewPiFaceDigital(spi.DEFAULT_HARDWARE_ADDR, spi.DEFAULT_BUS, spi.DEFAULT_CHIP)
 	err := pfd.InitBoard()
 	if err != nil {
-		fmt.Printf("Error on init board: %s", err)
+		fmt.Printf("DOOR: Error on init board: %s", err)
 		return err
 	}
 	Lock()
-	go checkOverride()
+	// This does not work properly
+	// go checkOverride()
 	return nil
 }
 
@@ -59,8 +60,8 @@ func Locked() bool {
 
 // Unlock x
 func Unlock() {
-	log.Println("Door: latch")
-	log.Println("LED: Green")
+	log.Println("DOOR: Latch activated")
+	log.Println("DOOR: LED: Green")
 	pfd.Leds[red].AllOff()
 	pfd.Leds[blue].AllOff()
 	pfd.Leds[white].AllOff()
@@ -75,7 +76,7 @@ func Unlock() {
 
 // Reject x
 func Reject() {
-	log.Println("LED: Red")
+	log.Println("DOOR: LED: Red")
 	pfd.Leds[green].AllOff()
 	pfd.Leds[blue].AllOff()
 	pfd.Leds[white].AllOff()
@@ -87,7 +88,7 @@ func Reject() {
 
 // Wait x
 func Wait() {
-	log.Println("LED: Blue")
+	log.Println("DOOR: LED: Blue")
 	pfd.Leds[red].AllOff()
 	pfd.Leds[green].AllOff()
 	pfd.Leds[white].AllOff()
@@ -99,7 +100,7 @@ func Wait() {
 
 // Lock x
 func Lock() {
-	log.Println("LED: White")
+	log.Println("DOOR: LED: White")
 	pfd.Leds[red].AllOff()
 	pfd.Leds[green].AllOff()
 	pfd.Leds[blue].AllOff()
@@ -110,10 +111,11 @@ func Lock() {
 	return
 }
 
+// This does not work properly
 func checkOverride() {
 	for {
 		if pfd.Switches[override].Value() == closed && locked {
-			log.Println("Manual override, unlocking")
+			log.Println("DOOR: Manual override, unlocking")
 			Unlock()
 		}
 		time.Sleep(200 * time.Millisecond)

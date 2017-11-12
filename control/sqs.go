@@ -6,8 +6,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/teabot/parceldrop/door"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
@@ -68,7 +66,6 @@ func receive(svc *sqs.SQS, queueURL string) {
 	}
 
 	if len(result.Messages) == 0 {
-		log.Println("CONTROL: Received no messages")
 		return
 	}
 	for _, msg := range result.Messages {
@@ -79,25 +76,23 @@ func receive(svc *sqs.SQS, queueURL string) {
 		if err != nil {
 			log.Printf("CONTROL: Error decoding message body: %v, %v\n", body, err)
 		} else {
-			log.Printf("CONTROL: Processing payload: %v\n", payload)
 			processPayload(payload)
 		}
-		resultDelete, err := svc.DeleteMessage(&sqs.DeleteMessageInput{
+		_, err = svc.DeleteMessage(&sqs.DeleteMessageInput{
 			QueueUrl:      &queueURL,
 			ReceiptHandle: result.Messages[0].ReceiptHandle,
 		})
 
 		if err != nil {
-			fmt.Println("Delete Error", err)
+			fmt.Println("CONTROL: Delete Error", err)
 		}
-
-		fmt.Println("Message Deleted", resultDelete)
 	}
 }
 func processPayload(payload *Instruction) {
 	switch payload.InsType {
 	case OpenDoor:
-		openDoorInstruction(payload)
+		// This does not work
+		// openDoorInstruction(payload)
 	case RescindCode:
 		rescindInstruction(payload)
 	case UpdateCode:
@@ -107,10 +102,10 @@ func processPayload(payload *Instruction) {
 	}
 }
 
-func openDoorInstruction(payload *Instruction) {
-	log.Println("CONTROL: Remote override unlock")
-	door.Unlock()
-}
+// func openDoorInstruction(payload *Instruction) {
+// 	log.Println("CONTROL: Remote override unlock")
+// 	door.Unlock()
+// }
 
 func rescindInstruction(payload *Instruction) {
 	log.Println("CONTROL: Rescinding code")
@@ -135,7 +130,6 @@ func updateInstruction(payload *Instruction) {
 func decode(data []byte) (*Instruction, error) {
 	var p *Instruction
 	err := json.Unmarshal(data, &p)
-	log.Printf("CONTROL: Unmarshalled %v\n", p)
 	if err != nil {
 		return nil, err
 	}

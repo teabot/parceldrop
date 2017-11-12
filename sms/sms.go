@@ -1,4 +1,4 @@
-//assumes you have the following environment variables setup for AWS session creation
+// assumes you have the following environment variables setup for AWS session creation
 // AWS_SDK_LOAD_CONFIG=1
 // AWS_ACCESS_KEY_ID=XXXXXXXXXX
 // AWS_SECRET_ACCESS_KEY=XXXXXXXX
@@ -84,4 +84,16 @@ func SendInvalidCode(code string) {
 func SendDoorNotClosed() {
 	log.Println("SMS: door still open")
 	go func() { send("Door not closed") }()
+}
+
+// SendRescindedCode x
+func SendRescindedCode(digits *string) {
+	log.Println("SMS: code rescinded")
+	go func() { send("Code rescinded: " + *digits) }()
+}
+
+// SendUpdatedCode x
+func SendUpdatedCode(name, digits *string) {
+	log.Println("SMS: code updated")
+	go func() { send("Code updated: " + *name + " [" + *digits + "]") }()
 }
