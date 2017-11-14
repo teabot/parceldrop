@@ -54,6 +54,13 @@ func main() {
 	door.Initialise(overrideOpen)
 	control.InitialiseSqs(os.Getenv("AWS_SQS_QUEUE"), overrideOpen)
 
+	door.CheckSunRise(
+		os.Getenv("LATITUDE"),
+		os.Getenv("LONGITUDE"),
+		os.Getenv("DAY_START"),
+		os.Getenv("DAY_END"),
+		door.SetDarkOutside)
+
 	go func() {
 		sig := <-gracefulStop
 		fmt.Printf("caught sig: %+v", sig)

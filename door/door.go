@@ -29,6 +29,7 @@ const (
 var locked = true
 var pfd *piface.PiFaceDigital
 var openFn func(string)
+var darkOutside = false
 
 // Initialise x
 func Initialise(overrideFn func(string)) error {
@@ -107,9 +108,24 @@ func Lock() {
 	pfd.Leds[blue].AllOff()
 	pfd.Leds[latch].AllOff()
 
-	pfd.Leds[white].AllOn()
+	resetToLight()
 	locked = true
 	return
+}
+
+func SetDarkOutside(dark bool) {
+	darkOutside = dark
+	if locked {
+		resetToLight()
+	}
+}
+
+func resetToLight() {
+	if darkOutside {
+		pfd.Leds[white].AllOn()
+	} else {
+		pfd.Leds[white].AllOff()
+	}
 }
 
 // This does not work properly
