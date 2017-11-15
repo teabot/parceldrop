@@ -45,8 +45,12 @@ func adjust(now time.Time, latitude, longitude float64, dayStart, dayEnd time.Du
 	nowDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	start := nowDay.Add(dayStart)
 	end := nowDay.Add(dayEnd)
-	sunrise := astrotime.CalcSunrise(now, latitude, longitude)
-	sunset := astrotime.CalcSunset(now, latitude, longitude)
+	sunrise := astrotime.CalcSunrise(nowDay, latitude, longitude)
+	sunset := astrotime.CalcSunset(nowDay, latitude, longitude)
+
+	// fmt.Printf("Sunrise %v\n", sunrise)
+	// fmt.Printf("Sunset  %v\n", sunset)
+	// fmt.Printf("Now     %v\n", now)
 
 	if now.After(start) && now.Before(end) {
 		if now.Before(sunrise) || now.After(sunset) {
