@@ -22,8 +22,8 @@ const (
 	contact  inputPin = 0
 	override inputPin = 1
 
-	open   = 1
-	closed = 0
+	open   = 0
+	closed = 1
 )
 
 var locked = true
@@ -102,7 +102,7 @@ func Wait() {
 
 // Lock x
 func Lock() {
-	log.Println("DOOR: LED: White")
+	log.Println("DOOR: Locked")
 	pfd.Leds[red].AllOff()
 	pfd.Leds[green].AllOff()
 	pfd.Leds[blue].AllOff()
@@ -122,8 +122,10 @@ func SetDarkOutside(dark bool) {
 
 func resetToLight() {
 	if darkOutside {
+		log.Println("DOOR: LED: White")
 		pfd.Leds[white].AllOn()
 	} else {
+		// log.Println("DOOR: LED: Off")
 		pfd.Leds[white].AllOff()
 	}
 }
