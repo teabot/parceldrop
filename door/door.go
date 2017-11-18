@@ -11,6 +11,7 @@ import (
 
 type inputPin int
 type outputPin int
+type ContactState bool
 
 const (
 	red   outputPin = 4
@@ -22,8 +23,14 @@ const (
 	contact  inputPin = 0
 	override inputPin = 1
 
-	open   = 0
-	closed = 1
+	Open   ContactState = true
+	Closed ContactState = false
+
+	// when door is open
+	contactOpen = 0
+
+	// when door is closed
+	manualOverrideEngaged = 0
 )
 
 var locked = true
@@ -45,14 +52,11 @@ func Initialise(overrideFn func(string)) error {
 	return nil
 }
 
-// Open x
-func Open() bool {
-	return pfd.Switches[contact].Value() == open
-}
-
-// Closed x
-func Closed() bool {
-	return !Open()
+func State() ContactState {
+	if pfd.Switches[contact].Value() == contactOpen {
+		return Open
+	}
+	return Closed
 }
 
 // Locked x
@@ -133,7 +137,7 @@ func resetToLight() {
 // This does not work properly
 func checkOverride() {
 	for {
-		if pfd.Switches[override].Value() == closed && locked {
+		if pfd.Switches[override].Value() == manualOverrideEngaged && locked {
 			log.Println("DOOR: Manual override, unlocking")
 			openFn("button")
 		}

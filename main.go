@@ -34,6 +34,7 @@ import (
 )
 
 const (
+	openWaitDuration       = 60 * time.Second
 	doorOpenDuration       = 60 * time.Second
 	resetToIdleDuration    = 3 * time.Second
 	resetCodeInputDuration = 5 * time.Second
@@ -101,15 +102,15 @@ func main() {
 }
 
 func validCode(digits string) {
-	log.Printf("MAIN: Opened with code: %v\n", digits)
+	log.Printf("MAIN: Unlocked with code: %v\n", digits)
 	door.Unlock()
 	sms.SendCorrectCode(digits)
-	scheduleEvent(resetToLocked())
+	scheduleEvent(waitForDoorToBeOpened())
 }
 
 func overrideOpen(overrideType string) {
-	scheduleEvent(resetToLocked())
-	log.Printf("MAIN: Opened with override: %v\n", overrideType)
+	scheduleEvent(waitForDoorToBeOpened())
+	log.Printf("MAIN: Unlocked with override: %v\n", overrideType)
 	door.Unlock()
 	sms.SendOverrideOpen(overrideType)
 }
@@ -134,35 +135,69 @@ func unscheduleAnyEvents() {
 	}
 }
 
-func resetToLocked() *time.Timer {
-	resetToLocked := time.NewTimer(doorOpenDuration)
-	go checkDoorClosed(resetToLocked)
-	log.Println("MAIN: Scheduled resetToLocked")
+func waitForDoorToBeOpened() *time.Timer {
+	resetToLocked := time.NewTimer(openWaitDuration)
+	go checkDoor(resetToLocked, door.Open)
+	log.Println("MAIN: Scheduled resetToLocked (check=open)")
 	return resetToLocked
 }
 
-func checkDoorClosed(resetToLocked *time.Timer) {
-	checkContactClosed := make(chan bool)
-	go contactCheck(checkContactClosed)
-
-	select {
-	case <-resetToLocked.C:
-		log.Println("MAIN: resetToLocked returned")
-		if door.Open() {
-			sms.SendDoorNotClosed()
-			log.Println("MAIN: Door not closed")
-		}
-	case <-checkContactClosed:
-		unscheduleAnyEvents()
-	}
-	door.Lock()
+func resetToLocked() *time.Timer {
+	resetToLocked := time.NewTimer(doorOpenDuration)
+	go checkDoor(resetToLocked, door.Closed)
+	log.Println("MAIN: Scheduled resetToLocked (check=closed)")
+	return resetToLocked
 }
 
-func contactCheck(check chan bool) {
-	for door.Open() {
-		time.Sleep(500 * time.Millisecond)
+func checkDoor(checkDuration *time.Timer, expectedState door.ContactState) {
+	contact := make(chan bool)
+	stop := make(chan bool)
+	defer close(contact)
+	defer close(stop)
+
+	go contactCheck(contact, stop, expectedState)
+
+	select {
+	case <-checkDuration.C:
+		log.Println("MAIN: checkDuration returned")
+		switch expectedState {
+		case door.Closed:
+			if door.State() == door.Open {
+				sms.SendDoorNotClosed()
+				log.Println("MAIN: Door not closed")
+			}
+		case door.Open:
+			if door.State() == door.Closed {
+				sms.SendDoorNotOpened()
+				log.Println("MAIN: Door never opened")
+			}
+		}
+	case <-contact:
+		unscheduleAnyEvents()
 	}
-	log.Println("MAIN: Detected door close")
+	if expectedState == door.Open {
+		resetToLocked()
+	} else {
+		door.Lock()
+	}
+}
+
+func contactCheck(check chan bool, stop chan bool, expectedState door.ContactState) {
+	stopped := false
+	for door.State() != expectedState && !stopped {
+		select {
+		default:
+			time.Sleep(100 * time.Millisecond)
+		case <-stop:
+			stopped = true
+			return
+		}
+	}
+	if expectedState == door.Open {
+		log.Println("MAIN: Detected door open")
+	} else {
+		log.Println("MAIN: Detected door close")
+	}
 	check <- true
 }
 

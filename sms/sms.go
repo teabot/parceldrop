@@ -86,6 +86,12 @@ func SendDoorNotClosed() {
 	go func() { send("Door not closed") }()
 }
 
+// SendDoorNotOpened x
+func SendDoorNotOpened() {
+	log.Println("SMS: door wasn't opened")
+	go func() { send("Door wasn't opened") }()
+}
+
 // SendRescindedCode x
 func SendRescindedCode(digits *string) {
 	log.Println("SMS: code rescinded")
