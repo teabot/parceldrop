@@ -65,23 +65,23 @@ func Initialise(adminCode, defaultCode string) error {
 	return nil
 }
 
-func Check(digits string, now time.Time) bool {
+func Check(digits string, now time.Time) (bool, string) {
 	if digits == masterCode {
 		log.Printf("CODEBOOK: Matched admin code: %v\n", digits)
-		return true
+		return true, "Master"
 	}
 	code, _ := GetAccessCode(digits)
 	if code == nil {
 		log.Printf("CODEBOOK: Code not found: %v\n", digits)
-		return false
+		return false, ""
 	}
 	if !code.hasType(Active) {
 		log.Printf("CODEBOOK: Code not active: %v\n", digits)
-		return false
+		return false, code.Name
 	}
 	if code.hasType(Count) && (code.Usage < 0 || code.MaxUsage < 1 || code.Usage >= code.MaxUsage) {
 		log.Printf("CODEBOOK: Usage exceeded: %v, %v>=%v\n", digits, code.Usage, code.MaxUsage)
-		return false
+		return false, code.Name
 	}
 
 	nowStr := now.Format(ISO8601)
@@ -89,34 +89,34 @@ func Check(digits string, now time.Time) bool {
 		firstUse, err := time.Parse(ISO8601, string(code.FirstUse))
 		if err != nil {
 			log.Printf("CODEBOOK: Duration: Invalid first use: %v, %v\n", digits, code.FirstUse)
-			return false
+			return false, code.Name
 		}
 		duration := time.Duration(code.ValidityHours) * time.Hour
 		if firstUse.Add(duration).Before(now) {
 			log.Printf("CODEBOOK: Duration expired: %v, %v, %vhrs\n", digits, code.FirstUse, code.ValidityHours)
-			return false
+			return false, code.Name
 		}
 	}
 	if code.hasType(Interval) {
 		from, err := time.Parse(ISO8601, string(code.ValidFrom))
 		if err != nil {
 			log.Printf("CODEBOOK: Interval: Invalid from: %v, %v\n", digits, code.ValidFrom)
-			return false
+			return false, code.Name
 		}
 		to, err := time.Parse(ISO8601, string(code.Expiration))
 		if err != nil {
 			log.Printf("CODEBOOK: Interval: Invalid to: %v, %v\n", digits, code.Expiration)
-			return false
+			return false, code.Name
 		}
 		if now.Before(from) || now.After(to) {
 			log.Printf("CODEBOOK: Outside of interval: %v, %v -> %v\n", digits, code.ValidFrom, code.Expiration)
-			return false
+			return false, code.Name
 		}
 	}
 	if code.hasType(DayFilter) {
 		if now.Hour() < 7 || now.Hour() > 21 {
 			log.Printf("CODEBOOK: Outside of day pattern: %v\n", digits)
-			return false
+			return false, code.Name
 		}
 	}
 	if code.Usage == 0 {
@@ -124,7 +124,7 @@ func Check(digits string, now time.Time) bool {
 	}
 	code.Usage++
 	code.save()
-	return true
+	return true, code.Name
 }
 
 func Close() {

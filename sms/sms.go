@@ -69,9 +69,9 @@ func send(message string) {
 }
 
 // SendCorrectCode x
-func SendCorrectCode(code string) {
+func SendCorrectCode(code, name string) {
 	log.Printf("SMS: correct code: %v\n", code)
-	go func() { send("Door opened with code " + code) }()
+	go func() { send("Door opened with code " + code + " [" + name + "]") }()
 }
 
 // SendInvalidCode x
