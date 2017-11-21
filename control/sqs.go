@@ -36,7 +36,7 @@ func InitialiseSqs(queueURL string, overrideFn func(string)) {
 	}))
 
 	svc := sqs.New(sess)
-	ticker := time.NewTicker(3 * time.Second)
+	ticker := time.NewTicker(1 * time.Second)
 	go poll(ticker, svc, queueURL)
 }
 
@@ -50,6 +50,7 @@ func poll(ticker *time.Ticker, svc *sqs.SQS, queueURL string) {
 }
 
 func receive(svc *sqs.SQS, queueURL string) {
+	// log.Println("CONTROL: Polling")
 	result, err := svc.ReceiveMessage(&sqs.ReceiveMessageInput{
 		AttributeNames: []*string{
 			aws.String(sqs.MessageSystemAttributeNameSentTimestamp),
@@ -60,8 +61,9 @@ func receive(svc *sqs.SQS, queueURL string) {
 		QueueUrl:            &queueURL,
 		MaxNumberOfMessages: aws.Int64(1),
 		VisibilityTimeout:   aws.Int64(36000), // 10 hours
-		WaitTimeSeconds:     aws.Int64(0),
+		WaitTimeSeconds:     aws.Int64(20),
 	})
+	// log.Println("CONTROL: Polled")
 
 	if err != nil {
 		log.Println("CONTROL: Error polling SQS", err)

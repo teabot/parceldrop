@@ -97,7 +97,7 @@ func Wait() {
 	log.Println("DOOR: LED: Blue")
 	pfd.Leds[red].AllOff()
 	pfd.Leds[green].AllOff()
-	pfd.Leds[white].AllOff()
+	// pfd.Leds[white].AllOff()
 	pfd.Leds[latch].AllOff()
 
 	pfd.Leds[blue].AllOn()
@@ -126,7 +126,7 @@ func SetDarkOutside(dark bool) {
 
 func resetToLight() {
 	if darkOutside {
-		log.Println("DOOR: LED: White")
+		//log.Println("DOOR: LED: White")
 		pfd.Leds[white].AllOn()
 	} else {
 		// log.Println("DOOR: LED: Off")
