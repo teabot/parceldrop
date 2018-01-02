@@ -8,6 +8,7 @@ package sms
 
 import (
 	"log"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -71,7 +72,7 @@ func send(message string) {
 // SendCorrectCode x
 func SendCorrectCode(code, name string) {
 	log.Printf("SMS: correct code: %v\n", code)
-	go func() { send("Door opened with code " + code + " [" + name + "]") }()
+	go func() { send("Door opened with code " + redactCode(code) + " [" + name + "]") }()
 }
 
 // SendInvalidCode x
@@ -101,11 +102,20 @@ func SendRescindedCode(digits *string) {
 // SendUpdatedCode x
 func SendUpdatedCode(name, digits *string) {
 	log.Println("SMS: code updated")
-	go func() { send("Code updated: " + *name + " [" + *digits + "]") }()
+	go func() { send("Code updated: " + *name + " [" + redactCode(*digits) + "]") }()
 }
 
 // SendOverrideOpen x
 func SendOverrideOpen(overrideType string) {
 	log.Printf("SMS: open override: %v\n", overrideType)
 	go func() { send("Door opened with override " + overrideType) }()
+}
+
+func redactCode(digits string) string {
+	if len(digits) < 5 {
+		return strings.Repeat("*", 4)
+	} else if len(digits) == 5 {
+		return string(digits[0]) + strings.Repeat("*", 4)
+	}
+	return string(digits[0]) + strings.Repeat("*", len(digits)-2) + string(digits[len(digits)-1])
 }
