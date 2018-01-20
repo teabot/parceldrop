@@ -1,5 +1,9 @@
 # parceldrop
 
+## Build
+
+    env GOOS=linux GOARCH=arm GOARM=5 go build
+
 ## Environment
 * `AWS_SDK_LOAD_CONFIG`
 * `AWS_ACCESS_KEY_ID`
