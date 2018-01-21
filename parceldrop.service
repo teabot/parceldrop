@@ -1,0 +1,14 @@
+[Unit]
+Description=ParcelDrop Door Control Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+EnvironmentFile=/etc/parceldrop
+WorkingDirectory=/var/run/parceldrop
+ExecStart=/usr/bin/parceldrop
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

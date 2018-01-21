@@ -16,4 +16,6 @@ Gopkg.lock
 /bin/
 .AppleDouble
 env.sh
+service.env
 parceldrop
+parceldrop.tar.gz
