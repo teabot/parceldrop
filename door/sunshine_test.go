@@ -4,8 +4,6 @@ import (
 	"strconv"
 	"testing"
 	"time"
-
-	"github.com/cpucycle/astrotime"
 )
 
 func TestWinter(t *testing.T) {
@@ -114,24 +112,29 @@ func TestSummer(t *testing.T) {
 // to the time component of the time instant passed into `CalcSunrise` and `CalcSunset`;
 // if for a given day a pass I in multiple instants, each with a slightly different time
 // component, the calculates for sunrise/set for that day will vary per instant. Here is
-// an example tests case. To work around this I'm simply setting the time component of the
-// input instant to `00:00:00+0ns`
-func TestDrift(t *testing.T) {
-	lat, _ := strconv.ParseFloat("56.613078", 64)
-	long, _ := strconv.ParseFloat("-2.165323", 64)
+// an example tests case.
 
-	now1, _ := time.Parse(time.RFC3339, "2017-11-13T01:00:00Z")
-	sunrise1 := astrotime.CalcSunrise(now1, lat, long)
-	sunset1 := astrotime.CalcSunset(now1, lat, long)
+// func TestDrift(t *testing.T) {
+// 	lat, _ := strconv.ParseFloat("56.613078", 64)
+// 	long, _ := strconv.ParseFloat("-2.165323", 64)
 
-	now2, _ := time.Parse(time.RFC3339, "2017-11-13T02:00:00Z")
-	sunrise2 := astrotime.CalcSunrise(now2, lat, long)
-	sunset2 := astrotime.CalcSunset(now2, lat, long)
+// 	now1, _ := time.Parse(time.RFC3339, "2017-11-13T01:00:00Z")
+// 	sunrise1 := astrotime.CalcSunrise(now1, lat, long)
+// 	sunset1 := astrotime.CalcSunset(now1, lat, long)
 
-	if !sunrise1.Equal(sunrise2) {
-		t.Errorf("Expected sunrise instants to match but %v != %v\n", sunrise1, sunrise2)
-	}
-	if !sunset1.Equal(sunset2) {
-		t.Errorf("Expected sunset instants to match but %v != %v\n", sunset1, sunset2)
-	}
-}
+// 	now2, _ := time.Parse(time.RFC3339, "2017-11-13T02:00:00Z")
+// 	sunrise2 := astrotime.CalcSunrise(now2, lat, long)
+// 	sunset2 := astrotime.CalcSunset(now2, lat, long)
+
+// 	if !sunrise1.Equal(sunrise2) {
+// 		// fails
+// 		t.Errorf("Expected sunrise instants to match but %v != %v\n", sunrise1, sunrise2)
+// 	}
+// 	if !sunset1.Equal(sunset2) {
+// 		//fails
+// 		t.Errorf("Expected sunset instants to match but %v != %v\n", sunset1, sunset2)
+// 	}
+// }
+
+// To work around this I'm simply setting the time component of the input instant to
+// `00:00:00+0ns`, however I believe this should be the responsibility of `astrotime`.

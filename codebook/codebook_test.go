@@ -11,7 +11,11 @@ func TestMaster(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
 	}
-	if !Check("123456", time.Now().UTC()) {
+	check, name := Check("123456", time.Now().UTC())
+	if !check {
+		t.Errorf("Expected check to succeed\n")
+	}
+	if name != "Master" {
 		t.Errorf("Expected check to succeed\n")
 	}
 }
@@ -22,7 +26,11 @@ func TestDefault(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
 	}
-	if !Check("999999", time.Now().UTC()) {
+	check, name := Check("999999", time.Now().UTC())
+	if !check {
+		t.Errorf("Expected check to succeed\n")
+	}
+	if name != "Master" {
 		t.Errorf("Expected check to succeed\n")
 	}
 }
@@ -33,7 +41,11 @@ func TestUnknown(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
 	}
-	if Check("5555", time.Now().UTC()) {
+	check, name := Check("5555", time.Now().UTC())
+	if check {
+		t.Errorf("Expected check to fail\n")
+	}
+	if name != "" {
 		t.Errorf("Expected check to fail\n")
 	}
 }
@@ -54,7 +66,8 @@ func TestValidCount(t *testing.T) {
 	}
 	code.save()
 
-	if !Check("6789", time.Now().UTC()) {
+	check, _ := Check("6789", time.Now().UTC())
+	if !check {
 		t.Errorf("Expected check to succeed\n")
 	}
 
@@ -81,7 +94,8 @@ func TestValidCountFirstUse(t *testing.T) {
 	code.save()
 
 	now := time.Now().UTC()
-	if !Check("6789", now) {
+	check, _ := Check("6789", now)
+	if !check {
 		t.Errorf("Expected check to succeed\n")
 	}
 
@@ -110,7 +124,8 @@ func TestInvalidCount(t *testing.T) {
 	}
 	code.save()
 
-	if Check("6789", time.Now().UTC()) {
+	check, _ := Check("6789", time.Now().UTC())
+	if check {
 		t.Errorf("Expected check to fail\n")
 	}
 }
@@ -123,13 +138,14 @@ func TestInvalidType(t *testing.T) {
 	}
 
 	code := AccessCode{
-		Types:  []CodeType{"active"},
+		Types:  []CodeType{},
 		Name:   "Test",
 		Digits: "6789",
 	}
 	code.save()
 
-	if Check("6789", time.Now().UTC()) {
+	check, _ := Check("6789", time.Now().UTC())
+	if check {
 		t.Errorf("Expected check to fail\n")
 	}
 }
@@ -148,7 +164,8 @@ func TestInactiveType(t *testing.T) {
 	}
 	code.save()
 
-	if Check("6789", time.Now().UTC()) {
+	check, _ := Check("6789", time.Now().UTC())
+	if check {
 		t.Errorf("Expected check to fail\n")
 	}
 }
@@ -169,7 +186,8 @@ func TestDurationInvalidFirstUse(t *testing.T) {
 	}
 	code.save()
 
-	if Check("6789", time.Now().UTC()) {
+	check, _ := Check("6789", time.Now().UTC())
+	if check {
 		t.Errorf("Expected check to fail\n")
 	}
 }
@@ -192,7 +210,8 @@ func TestDurationExpired(t *testing.T) {
 	}
 	code.save()
 
-	if Check("6789", time.Now().UTC()) {
+	check, _ := Check("6789", time.Now().UTC())
+	if check {
 		t.Errorf("Expected check to fail\n")
 	}
 }
@@ -215,7 +234,8 @@ func TestDurationOk(t *testing.T) {
 	}
 	code.save()
 
-	if !Check("6789", time.Now().UTC()) {
+	check, _ := Check("6789", time.Now().UTC())
+	if !check {
 		t.Errorf("Expected check to succeed\n")
 	}
 
@@ -242,7 +262,8 @@ func TestIntervalInvalidFrom(t *testing.T) {
 	}
 	code.save()
 
-	if Check("6789", time.Now().UTC()) {
+	check, _ := Check("6789", time.Now().UTC())
+	if check {
 		t.Errorf("Expected check to fail\n")
 	}
 }
@@ -264,7 +285,8 @@ func TestIntervalInvalidTo(t *testing.T) {
 	}
 	code.save()
 
-	if Check("6789", time.Now().UTC()) {
+	check, _ := Check("6789", time.Now().UTC())
+	if check {
 		t.Errorf("Expected check to fail\n")
 	}
 }
@@ -286,10 +308,12 @@ func TestIntervalOutside(t *testing.T) {
 	}
 	code.save()
 
-	if Check("6789", now.Add(2*time.Hour)) {
+	check, _ := Check("6789", now.Add(2*time.Hour))
+	if check {
 		t.Errorf("Expected check to fail\n")
 	}
-	if Check("6789", now.Add(-2*time.Hour)) {
+	check, _ = Check("6789", now.Add(-2*time.Hour))
+	if check {
 		t.Errorf("Expected check to fail\n")
 	}
 }
@@ -311,7 +335,8 @@ func TestIntervalInside(t *testing.T) {
 	}
 	code.save()
 
-	if !Check("6789", now) {
+	check, _ := Check("6789", now)
+	if !check {
 		t.Errorf("Expected check to succeed\n")
 	}
 }
@@ -333,7 +358,8 @@ func TestDayInside(t *testing.T) {
 	code.save()
 
 	now, _ := time.Parse(ISO8601, "2017-11-09T11:10:03+0000")
-	if !Check("6789", now) {
+	check, _ := Check("6789", now)
+	if !check {
 		t.Errorf("Expected check to succeed\n")
 	}
 }
@@ -355,11 +381,13 @@ func TestDayOutside(t *testing.T) {
 	code.save()
 
 	now1, _ := time.Parse(ISO8601, "2017-11-09T06:59:03+0000")
-	if Check("6789", now1) {
+	check, _ := Check("6789", now1)
+	if check {
 		t.Errorf("Expected check to fail\n")
 	}
 	now2, _ := time.Parse(ISO8601, "2017-11-09T22:01:03+0000")
-	if Check("6789", now2) {
+	check, _ = Check("6789", now2)
+	if check {
 		t.Errorf("Expected check to fail\n")
 	}
 }
