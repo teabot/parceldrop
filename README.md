@@ -2,7 +2,8 @@
 
 ## Build
 
-    env GOOS=linux GOARCH=arm GOARM=5 go build
+	make
+        ./INSTALL.sh
 
 ## Environment
 * `AWS_SDK_LOAD_CONFIG`

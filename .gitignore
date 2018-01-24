@@ -19,4 +19,3 @@ env.sh
 *.service.env
 parceldrop
 parceldrop.tar.gz
-codebook/codebook.db
