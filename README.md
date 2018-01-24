@@ -2,8 +2,8 @@
 
 ## Build
 
-	make
-        ./INSTALL.sh
+	make package
+	./INSTALL.sh
 
 ## Environment
 * `AWS_SDK_LOAD_CONFIG`
