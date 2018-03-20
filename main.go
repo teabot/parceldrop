@@ -76,9 +76,9 @@ func main() {
 			unscheduleAnyEvents()
 			door.Wait()
 			log.Printf("MAIN: Code: %v, Submitted: %v\n", code.Digits, code.Submitted)
-			valid, name := codebook.Check(code.Digits, time.Now().UTC())
+			valid, silent, name := codebook.Check(code.Digits, time.Now().UTC())
 			if valid {
-				validCode(code.Digits, name)
+				validCode(code.Digits, name, silent)
 			} else {
 				if code.Submitted == keypad.Final || code.Submitted == keypad.User {
 					invalidCode(code.Digits)
@@ -102,10 +102,12 @@ func main() {
 	keypad.ScanCodes(keypad.DefaultDevice, resetCodeInputDuration, maxCodeLength, codeFn, keyTimeoutFn, errorFn)
 }
 
-func validCode(digits, name string) {
+func validCode(digits, name string, silent bool) {
 	log.Printf("MAIN: Unlocked with code: %v\n", digits)
 	door.Unlock()
-	sms.SendCorrectCode(digits, name)
+	if !silent {
+		sms.SendCorrectCode(digits, name)
+	}
 	scheduleEvent(waitForDoorToBeOpened())
 }
 
