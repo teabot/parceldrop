@@ -14,11 +14,12 @@ type outputPin int
 type ContactState bool
 
 const (
-	red   outputPin = 4
-	green outputPin = 5
-	blue  outputPin = 6
-	white outputPin = 7
-	latch outputPin = 3
+	red    outputPin = 4
+	green  outputPin = 5
+	blue   outputPin = 6
+	white  outputPin = 7
+	latch  outputPin = 3
+	lights outputPin = 2
 
 	contact  inputPin = 0
 	override inputPin = 1
@@ -73,6 +74,10 @@ func Unlock() {
 	pfd.Leds[white].AllOff()
 
 	pfd.Leds[green].AllOn()
+	if darkOutside {
+		pfd.Leds[lights].AllOn()
+	}
+
 	pfd.Leds[latch].AllOn()
 	time.Sleep(1 * time.Second)
 	pfd.Leds[latch].AllOff()
@@ -111,6 +116,7 @@ func Lock() {
 	pfd.Leds[green].AllOff()
 	pfd.Leds[blue].AllOff()
 	pfd.Leds[latch].AllOff()
+	pfd.Leds[lights].AllOff()
 
 	resetToLight()
 	locked = true

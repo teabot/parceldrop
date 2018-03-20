@@ -16,9 +16,12 @@ const (
 var db *bolt.DB
 var open bool
 
-func OpenStore() error {
+func OpenStore(codebookPath string) error {
 	var err error
 	dbfile := "codebook.db"
+	if codebookPath != "" {
+		dbfile = codebookPath
+	}
 	config := &bolt.Options{Timeout: 1 * time.Second}
 	db, err = bolt.Open(dbfile, 0600, config)
 	if err != nil {

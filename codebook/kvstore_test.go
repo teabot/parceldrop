@@ -5,7 +5,7 @@ import (
 )
 
 func TestOpenClose(t *testing.T) {
-	err := OpenStore()
+	err := OpenStore("")
 	defer CloseStore()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -13,7 +13,7 @@ func TestOpenClose(t *testing.T) {
 }
 
 func TestSaveAndGet(t *testing.T) {
-	err := OpenStore()
+	err := OpenStore("")
 	defer CloseStore()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -75,7 +75,7 @@ func TestSaveAndGet(t *testing.T) {
 }
 
 func TestSaveAndGetOther(t *testing.T) {
-	err := OpenStore()
+	err := OpenStore("")
 	defer CloseStore()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -104,7 +104,7 @@ func TestSaveAndGetOther(t *testing.T) {
 }
 
 func TestGetOther(t *testing.T) {
-	err := OpenStore()
+	err := OpenStore("")
 	defer CloseStore()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)

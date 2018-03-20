@@ -50,7 +50,7 @@ func main() {
 	signal.Notify(gracefulStop, syscall.SIGTERM)
 	signal.Notify(gracefulStop, syscall.SIGINT)
 
-	codebook.Initialise(os.Getenv("ADMIN_CODE"), defaultCode)
+	codebook.Initialise(os.Getenv("CODEBOOK_PATH"), os.Getenv("ADMIN_CODE"), defaultCode)
 	sms.Initialise(strings.Split(os.Getenv("SMS_DESTINATIONS"), ","))
 	door.Initialise(overrideOpen)
 	control.InitialiseSqs(os.Getenv("AWS_SQS_QUEUE"), overrideOpen)

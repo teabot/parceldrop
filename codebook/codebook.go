@@ -45,20 +45,21 @@ const (
 	Interval  CodeType = "interval"
 	Count     CodeType = "count"
 	DayFilter CodeType = "day"
+	Silent    CodeType = "silent"
 
 	ISO8601 = "2006-01-02T15:04:05-0700"
 )
 
 var masterCode string
 
-func Initialise(adminCode, defaultCode string) error {
+func Initialise(codebookPath, adminCode, defaultCode string) error {
 	if len(adminCode) > 0 {
 		masterCode = adminCode
 	} else {
 		masterCode = defaultCode
 	}
 
-	err := OpenStore()
+	err := OpenStore(codebookPath)
 	if err != nil {
 		return err
 	}
