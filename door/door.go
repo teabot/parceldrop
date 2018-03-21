@@ -37,6 +37,7 @@ const (
 var locked = true
 var pfd *piface.PiFaceDigital
 var openFn func(string)
+var darkOutsideInHours = false
 var darkOutside = false
 
 // Initialise x
@@ -123,7 +124,8 @@ func Lock() {
 	return
 }
 
-func SetDarkOutside(dark bool) {
+func SetDarkOutside(darkInHours, dark bool) {
+	darkOutsideInHours = darkInHours
 	darkOutside = dark
 	if locked {
 		resetToLight()
@@ -131,7 +133,7 @@ func SetDarkOutside(dark bool) {
 }
 
 func resetToLight() {
-	if darkOutside {
+	if darkOutsideInHours {
 		//log.Println("DOOR: LED: White")
 		pfd.Leds[white].AllOn()
 	} else {

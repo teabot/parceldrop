@@ -16,43 +16,43 @@ func TestWinter(t *testing.T) {
 	// Sunset: 2017-11-13 16:12:10 +0000 UTC
 
 	now, _ := time.Parse(time.RFC3339, "2017-11-13T06:29:59Z")
-	if adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); s {
 		t.Errorf("Expected false\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-11-13T06:30:01Z")
-	if !adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); !s {
 		t.Errorf("Expected true\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-11-13T07:14:27Z")
-	if !adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); !s {
 		t.Errorf("Expected true\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-11-13T07:14:29Z")
-	if adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); s {
 		t.Errorf("Expected false\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-11-13T12:00:00Z")
-	if adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); s {
 		t.Errorf("Expected false\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-11-13T16:12:09Z")
-	if adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); s {
 		t.Errorf("Expected false\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-11-13T16:12:11Z")
-	if !adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); !s {
 		t.Errorf("Expected true\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-11-13T21:59:00Z")
-	if !adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); !s {
 		t.Errorf("Expected true\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-11-13T22:01:00Z")
-	if adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); s {
 		t.Errorf("Expected false\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-11-13T23:59:59Z")
-	if adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); s {
 		t.Errorf("Expected false\n")
 	}
 }
@@ -67,43 +67,43 @@ func TestSummer(t *testing.T) {
 	// Sunset: 2017-06-21 20:20:59 +0000 UTC
 
 	now, _ := time.Parse(time.RFC3339, "2017-06-21T03:41:20Z")
-	if adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); s {
 		t.Errorf("Expected false\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-06-21T03:41:22Z")
-	if adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); s {
 		t.Errorf("Expected false\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-06-21T06:29:59Z")
-	if adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); s {
 		t.Errorf("Expected false\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-06-21T06:30:01Z")
-	if adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); s {
 		t.Errorf("Expected false\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-06-21T12:00:00Z")
-	if adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); s {
 		t.Errorf("Expected false\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-06-21T20:20:58Z")
-	if adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); s {
 		t.Errorf("Expected false\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-06-21T20:21:00Z")
-	if !adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); !s {
 		t.Errorf("Expected true\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-06-21T21:59:00Z")
-	if !adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); !s {
 		t.Errorf("Expected true\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-06-21T22:01:00Z")
-	if adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); s {
 		t.Errorf("Expected false\n")
 	}
 	now, _ = time.Parse(time.RFC3339, "2017-06-21T23:59:59Z")
-	if adjust(now, lat, long, start, end) {
+	if s, _ := adjust(now, lat, long, start, end); s {
 		t.Errorf("Expected false\n")
 	}
 }

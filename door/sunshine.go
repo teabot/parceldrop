@@ -10,7 +10,7 @@ import (
 
 var lastState bool
 
-func CheckSunRise(latitude, longitude, dayStart, dayEnd string, change func(bool)) {
+func CheckSunRise(latitude, longitude, dayStart, dayEnd string, change func(bool, bool)) {
 	lat, err := strconv.ParseFloat(latitude, 64)
 	if err != nil {
 		log.Fatalf("Invalid latitude: %v\n", latitude)
@@ -28,20 +28,20 @@ func CheckSunRise(latitude, longitude, dayStart, dayEnd string, change func(bool
 		log.Fatalf("Invalid day end: %v\n", dayEnd)
 	}
 	go func() {
-		change(false)
+		change(false, false)
 		for {
-			nextState := adjust(time.Now(), lat, long, start, end)
+			nextState, night := adjust(time.Now(), lat, long, start, end)
 			if nextState != lastState {
 				log.Printf("SUN: Changed light state to %v\n", nextState)
 			}
 			lastState = nextState
-			change(nextState)
+			change(nextState, night)
 			time.Sleep(60 * time.Second)
 		}
 	}()
 }
 
-func adjust(now time.Time, latitude, longitude float64, dayStart, dayEnd time.Duration) bool {
+func adjust(now time.Time, latitude, longitude float64, dayStart, dayEnd time.Duration) (bool, bool) {
 	nowDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	start := nowDay.Add(dayStart)
 	end := nowDay.Add(dayEnd)
@@ -54,8 +54,8 @@ func adjust(now time.Time, latitude, longitude float64, dayStart, dayEnd time.Du
 
 	if now.After(start) && now.Before(end) {
 		if now.Before(sunrise) || now.After(sunset) {
-			return true
+			return true, true
 		}
 	}
-	return false
+	return false, now.Before(sunrise) || now.After(sunset)
 }
