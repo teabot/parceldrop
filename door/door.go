@@ -14,12 +14,13 @@ type outputPin int
 type ContactState bool
 
 const (
-	red    outputPin = 4
-	green  outputPin = 5
-	blue   outputPin = 6
-	white  outputPin = 7
-	latch  outputPin = 3
-	lights outputPin = 2
+	red       outputPin = 4
+	green     outputPin = 5
+	blue      outputPin = 6
+	white     outputPin = 7
+	latch     outputPin = 3
+	lights    outputPin = 2
+	wallLight outputPin = 1
 
 	contact  inputPin = 0
 	override inputPin = 1
@@ -136,9 +137,11 @@ func resetToLight() {
 	if darkOutsideInHours {
 		//log.Println("DOOR: LED: White")
 		pfd.Leds[white].AllOn()
+		pfd.Leds[wallLight].AllOn()
 	} else {
 		// log.Println("DOOR: LED: Off")
 		pfd.Leds[white].AllOff()
+		pfd.Leds[wallLight].AllOff()
 	}
 }
 
