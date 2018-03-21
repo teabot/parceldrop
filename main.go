@@ -107,6 +107,8 @@ func validCode(digits, name string, silent bool) {
 	door.Unlock()
 	if !silent {
 		sms.SendCorrectCode(digits, name)
+	} else {
+		log.Printf("MAIN: SMS silenced for code: %v\n", digits)
 	}
 	scheduleEvent(waitForDoorToBeOpened())
 }
