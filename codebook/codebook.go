@@ -51,13 +51,17 @@ const (
 )
 
 var masterCode string
+var start, end time.Duration
 
-func Initialise(codebookPath, adminCode, defaultCode string) error {
+func Initialise(codebookPath, adminCode, defaultCode string, dayStart, dayEnd time.Duration) error {
 	if len(adminCode) > 0 {
 		masterCode = adminCode
 	} else {
 		masterCode = defaultCode
 	}
+
+	start = dayStart
+	end = dayEnd
 
 	err := OpenStore(codebookPath)
 	if err != nil {
@@ -115,8 +119,9 @@ func Check(digits string, now time.Time) (bool, bool, string) {
 		}
 	}
 	if code.hasType(DayFilter) {
-		if now.Hour() < 7 || now.Hour() > 21 {
-			log.Printf("CODEBOOK: Outside of day pattern: %v\n", digits)
+		nowDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+		if now.Before(nowDay.Add(start)) || now.After(nowDay.Add(end)) {
+			log.Printf("CODEBOOK: Outside of day pattern: %v, (%v -> %v @ %v)\n", digits, start, end, now)
 			return false, false, code.Name
 		}
 	}

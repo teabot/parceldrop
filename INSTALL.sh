@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mkdir -p /var/run/parceldrop
+mkdir -p /opt/parceldrop
 cp parceldrop /usr/bin/
 cp parceldrop.service /etc/systemd/system/
 #cp service.env /etc/parceldrop

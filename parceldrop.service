@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=root
 EnvironmentFile=/etc/parceldrop
-WorkingDirectory=/var/run/parceldrop
+WorkingDirectory=/opt/parceldrop
 ExecStart=/usr/bin/parceldrop
 Restart=on-abort
 

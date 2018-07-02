@@ -40,6 +40,7 @@ var pfd *piface.PiFaceDigital
 var openFn func(string)
 var darkOutsideInHours = false
 var darkOutside = false
+var lightsOnOveride = false
 
 // Initialise x
 func Initialise(overrideFn func(string)) error {
@@ -76,7 +77,7 @@ func Unlock() {
 	pfd.Leds[white].AllOff()
 
 	pfd.Leds[green].AllOn()
-	if darkOutside {
+	if darkOutside || lightsOnOveride {
 		pfd.Leds[lights].AllOn()
 	}
 
@@ -118,7 +119,9 @@ func Lock() {
 	pfd.Leds[green].AllOff()
 	pfd.Leds[blue].AllOff()
 	pfd.Leds[latch].AllOff()
-	pfd.Leds[lights].AllOff()
+	if !lightsOnOveride {
+		pfd.Leds[lights].AllOff()
+	}
 
 	resetToLight()
 	locked = true
@@ -134,7 +137,7 @@ func SetDarkOutside(darkInHours, dark bool) {
 }
 
 func resetToLight() {
-	if darkOutsideInHours {
+	if darkOutsideInHours || lightsOnOveride {
 		//log.Println("DOOR: LED: White")
 		pfd.Leds[white].AllOn()
 		pfd.Leds[wallLight].AllOn()
@@ -154,4 +157,18 @@ func checkOverride() {
 		}
 		time.Sleep(200 * time.Millisecond)
 	}
+}
+
+func LightsOn() {
+	lightsOnOveride = true
+	pfd.Leds[white].AllOn()
+	pfd.Leds[wallLight].AllOn()
+	pfd.Leds[lights].AllOn()
+}
+
+func LightsOff() {
+	lightsOnOveride = false
+	pfd.Leds[white].AllOff()
+	pfd.Leds[wallLight].AllOff()
+	pfd.Leds[lights].AllOff()
 }

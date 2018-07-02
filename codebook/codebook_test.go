@@ -6,7 +6,7 @@ import (
 )
 
 func TestMaster(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -24,7 +24,7 @@ func TestMaster(t *testing.T) {
 }
 
 func TestDefault(t *testing.T) {
-	err := Initialise("", "", "999999")
+	err := Initialise("", "", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -42,7 +42,7 @@ func TestDefault(t *testing.T) {
 }
 
 func TestUnknown(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -57,7 +57,7 @@ func TestUnknown(t *testing.T) {
 }
 
 func TestValidCount(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -84,7 +84,7 @@ func TestValidCount(t *testing.T) {
 }
 
 func TestSilent(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -107,7 +107,7 @@ func TestSilent(t *testing.T) {
 }
 
 func TestNotSilent(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -130,7 +130,7 @@ func TestNotSilent(t *testing.T) {
 }
 
 func TestValidCountFirstUse(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -161,7 +161,7 @@ func TestValidCountFirstUse(t *testing.T) {
 }
 
 func TestInvalidCount(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -183,7 +183,7 @@ func TestInvalidCount(t *testing.T) {
 }
 
 func TestInvalidType(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -203,7 +203,7 @@ func TestInvalidType(t *testing.T) {
 }
 
 func TestInactiveType(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -223,7 +223,7 @@ func TestInactiveType(t *testing.T) {
 }
 
 func TestDurationInvalidFirstUse(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -245,7 +245,7 @@ func TestDurationInvalidFirstUse(t *testing.T) {
 }
 
 func TestDurationExpired(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -269,7 +269,7 @@ func TestDurationExpired(t *testing.T) {
 }
 
 func TestDurationOk(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -298,7 +298,7 @@ func TestDurationOk(t *testing.T) {
 }
 
 func TestIntervalInvalidFrom(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -321,7 +321,7 @@ func TestIntervalInvalidFrom(t *testing.T) {
 }
 
 func TestIntervalInvalidTo(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -344,7 +344,7 @@ func TestIntervalInvalidTo(t *testing.T) {
 }
 
 func TestIntervalOutside(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -371,7 +371,7 @@ func TestIntervalOutside(t *testing.T) {
 }
 
 func TestIntervalInside(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -394,7 +394,7 @@ func TestIntervalInside(t *testing.T) {
 }
 
 func TestDayInside(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -417,7 +417,7 @@ func TestDayInside(t *testing.T) {
 }
 
 func TestDayOutside(t *testing.T) {
-	err := Initialise("", "123456", "999999")
+	err := Initialise("", "123456", "999999", time.ParseDuration("6h30m"), time.ParseDuration("21h30m"))
 	defer Close()
 	if err != nil {
 		t.Errorf("Expected no error, got %v\n", err)
@@ -432,12 +432,12 @@ func TestDayOutside(t *testing.T) {
 	}
 	code.save()
 
-	now1, _ := time.Parse(ISO8601, "2017-11-09T06:59:03+0000")
+	now1, _ := time.Parse(ISO8601, "2017-11-09T06:29:03+0000")
 	check, _, _ := Check("6789", now1)
 	if check {
 		t.Errorf("Expected check to fail\n")
 	}
-	now2, _ := time.Parse(ISO8601, "2017-11-09T22:01:03+0000")
+	now2, _ := time.Parse(ISO8601, "2017-11-09T21:31:03+0000")
 	check, _, _ = Check("6789", now2)
 	if check {
 		t.Errorf("Expected check to fail\n")

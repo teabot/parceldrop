@@ -10,7 +10,7 @@ import (
 
 var lastState bool
 
-func CheckSunRise(latitude, longitude, dayStart, dayEnd string, change func(bool, bool)) {
+func CheckSunRise(latitude, longitude string, dayStart, dayEnd time.Duration, change func(bool, bool)) {
 	lat, err := strconv.ParseFloat(latitude, 64)
 	if err != nil {
 		log.Fatalf("Invalid latitude: %v\n", latitude)
@@ -19,18 +19,11 @@ func CheckSunRise(latitude, longitude, dayStart, dayEnd string, change func(bool
 	if err != nil {
 		log.Fatalf("Invalid longitude: %v\n", longitude)
 	}
-	start, err := time.ParseDuration(dayStart)
-	if err != nil {
-		log.Fatalf("Invalid day start: %v\n", dayStart)
-	}
-	end, err := time.ParseDuration(dayEnd)
-	if err != nil {
-		log.Fatalf("Invalid day end: %v\n", dayEnd)
-	}
+
 	go func() {
 		change(false, false)
 		for {
-			nextState, night := adjust(time.Now(), lat, long, start, end)
+			nextState, night := adjust(time.Now(), lat, long, dayStart, dayEnd)
 			if nextState != lastState {
 				log.Printf("SUN: Changed light state to %v\n", nextState)
 			}

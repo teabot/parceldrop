@@ -50,7 +50,16 @@ func main() {
 	signal.Notify(gracefulStop, syscall.SIGTERM)
 	signal.Notify(gracefulStop, syscall.SIGINT)
 
-	codebook.Initialise(os.Getenv("CODEBOOK_PATH"), os.Getenv("ADMIN_CODE"), defaultCode)
+	start, err := time.ParseDuration(os.Getenv("DAY_START"))
+	if err != nil {
+		log.Fatalf("Invalid day start: %v\n", os.Getenv("DAY_START"))
+	}
+	end, err := time.ParseDuration(os.Getenv("DAY_END"))
+	if err != nil {
+		log.Fatalf("Invalid day end: %v\n", os.Getenv("DAY_END"))
+	}
+
+	codebook.Initialise(os.Getenv("CODEBOOK_PATH"), os.Getenv("ADMIN_CODE"), defaultCode, start, end)
 	sms.Initialise(strings.Split(os.Getenv("SMS_DESTINATIONS"), ","))
 	door.Initialise(overrideOpen)
 	control.InitialiseSqs(os.Getenv("AWS_SQS_QUEUE"), overrideOpen)
@@ -58,8 +67,8 @@ func main() {
 	door.CheckSunRise(
 		os.Getenv("LATITUDE"),
 		os.Getenv("LONGITUDE"),
-		os.Getenv("DAY_START"),
-		os.Getenv("DAY_END"),
+		start,
+		end,
 		door.SetDarkOutside)
 
 	go func() {
@@ -76,12 +85,20 @@ func main() {
 			unscheduleAnyEvents()
 			door.Wait()
 			log.Printf("MAIN: Code: %v, Submitted: %v\n", code.Digits, code.Submitted)
-			valid, silent, name := codebook.Check(code.Digits, time.Now().UTC())
-			if valid {
-				validCode(code.Digits, name, silent)
+			if code.Digits == "111110" {
+				door.LightsOff()
+				log.Printf("MAIN: Lights override off\n")
+			} else if code.Digits == "111111" {
+				door.LightsOn()
+				log.Printf("MAIN: Lights override on\n")
 			} else {
-				if code.Submitted == keypad.Final || code.Submitted == keypad.User {
-					invalidCode(code.Digits)
+				valid, silent, name := codebook.Check(code.Digits, time.Now())
+				if valid {
+					validCode(code.Digits, name, silent)
+				} else {
+					if code.Submitted == keypad.Final || code.Submitted == keypad.User {
+						invalidCode(code.Digits)
+					}
 				}
 			}
 		}
