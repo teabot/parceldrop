@@ -36,3 +36,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/luismesas/goPi"
+
+[[constraint]]
+  name = "github.com/pquerna/otp"
+  branch = "master"

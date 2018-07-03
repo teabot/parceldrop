@@ -31,6 +31,7 @@ import (
 	"github.com/teabot/parceldrop/door"
 	"github.com/teabot/parceldrop/keypad"
 	"github.com/teabot/parceldrop/sms"
+	"github.com/teabot/parceldrop/totp"
 )
 
 const (
@@ -64,6 +65,15 @@ func main() {
 	door.Initialise(overrideOpen)
 	control.InitialiseSqs(os.Getenv("AWS_SQS_QUEUE"), overrideOpen)
 
+	period, err := time.ParseDuration(os.Getenv("TOTP_PERIOD"))
+	if err != nil {
+		log.Fatalf("Invalid TOTP period: %v\n", os.Getenv("TOTP_PERIOD"))
+	}
+	totp.Initialise(
+		os.Getenv("TOTP_SECRET"),
+		period,
+	)
+
 	door.CheckSunRise(
 		os.Getenv("LATITUDE"),
 		os.Getenv("LONGITUDE"),
@@ -85,7 +95,10 @@ func main() {
 			unscheduleAnyEvents()
 			door.Wait()
 			log.Printf("MAIN: Code: %v, Submitted: %v\n", code.Digits, code.Submitted)
-			if code.Digits == "111110" {
+			if totp.Validate(code.Digits, time.Now()) {
+				log.Printf("MAIN: OTP\n")
+				validCode(code.Digits, "OTP", false)
+			} else if code.Digits == "111110" {
 				door.LightsOff()
 				log.Printf("MAIN: Lights override off\n")
 			} else if code.Digits == "111111" {
