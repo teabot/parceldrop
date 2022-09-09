@@ -17,7 +17,6 @@ type InstructionType string
 // Annoyingly, HomeAssistant SQS integration insists on an envelope
 // https://www.home-assistant.io/integrations/aws/#sqs-notify-usage
 type HomeAssistantNofication struct {
-	Target  *string
 	Message *string
 }
 
@@ -84,14 +83,9 @@ func receive(svc *sqs.SQS, queueURL string) {
 		body := aws.StringValue(msg.Body)
 		log.Printf("CONTROL: Received messages: %v\n", body)
 
-		payload, err := decodeInstruction([]byte(body))
+		payload, err := decodeHomeAssistantNofication([]byte(body))
 		if err != nil {
-			payload, err := decodeHomeAssistantNofication([]byte(body))
-			if err != nil {
-				log.Printf("CONTROL: Error decoding message body: %v, %v\n", body, err)
-			} else {
-				processPayload(payload)
-			}
+			log.Printf("CONTROL: Error decoding message body: %v, %v\n", body, err)
 		} else {
 			processPayload(payload)
 		}
