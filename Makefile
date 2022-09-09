@@ -26,4 +26,4 @@ clean:
 
 .PHONY: dep
 dep:
-	dep ensure -vendor-only
+	$(GO) mod tidy
