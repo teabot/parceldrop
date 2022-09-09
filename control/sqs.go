@@ -14,6 +14,13 @@ import (
 
 type InstructionType string
 
+// Annoyingly, HomeAssistant SQS integration insists on an envelope
+// https://www.home-assistant.io/integrations/aws/#sqs-notify-usage
+type HomeAssistantNofication struct {
+	Target  *string
+	Message *string
+}
+
 type Instruction struct {
 	InsType    InstructionType
 	Digits     *string
@@ -77,9 +84,14 @@ func receive(svc *sqs.SQS, queueURL string) {
 		body := aws.StringValue(msg.Body)
 		log.Printf("CONTROL: Received messages: %v\n", body)
 
-		payload, err := decode([]byte(body))
+		payload, err := decodeInstruction([]byte(body))
 		if err != nil {
-			log.Printf("CONTROL: Error decoding message body: %v, %v\n", body, err)
+			payload, err := decodeHomeAssistantNofication([]byte(body))
+			if err != nil {
+				log.Printf("CONTROL: Error decoding message body: %v, %v\n", body, err)
+			} else {
+				processPayload(payload)
+			}
 		} else {
 			processPayload(payload)
 		}
@@ -131,11 +143,20 @@ func updateInstruction(payload *Instruction) {
 	}
 }
 
-func decode(data []byte) (*Instruction, error) {
+func decodeInstruction(data []byte) (*Instruction, error) {
 	var p *Instruction
 	err := json.Unmarshal(data, &p)
 	if err != nil {
 		return nil, err
 	}
 	return p, nil
+}
+
+func decodeHomeAssistantNofication(data []byte) (*Instruction, error) {
+	var m *HomeAssistantNofication
+	err := json.Unmarshal(data, &m)
+	if err != nil {
+		return nil, err
+	}
+	return decodeInstruction([]byte(*m.Message))
 }
